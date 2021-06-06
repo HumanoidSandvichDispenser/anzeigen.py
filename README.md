@@ -1,4 +1,4 @@
-# anzeige.py
+# anzeigen.py
 
 A terminal markdown renderer using `ueberzug` to display images.
 
