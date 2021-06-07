@@ -4,7 +4,7 @@
 #
 # Copyright © 2021 sandvich <sandvich@manjaro>
 #
-# Distributed under terms of the MIT license.
+# Distributed under terms of the GPLv3 license.
 
 from pygments import highlight, util
 from pygments.lexers import get_lexer_by_name, TextLexer

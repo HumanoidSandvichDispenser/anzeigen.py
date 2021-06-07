@@ -4,10 +4,10 @@
 #
 # Copyright © 2021 sandvich <sandvich@manjaro>
 #
-# Distributed under terms of the MIT license.
+# Distributed under terms of the GPL3 license.
 
 from element import Element
 
 
 class Paragraph(Element):
-    pass
+    inner_elements: list = []

@@ -7,7 +7,7 @@
 # Distributed under terms of the MIT license.
 
 class Element:
-    inner_elements: list = []
+    inner: str
 
-    def __init__(self, *inner):
-        self.inner_elements.append(inner)
+    def __init__(self, inner):
+        self.inner = inner
