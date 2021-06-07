@@ -6,12 +6,11 @@
 #
 # Distributed under terms of the GPLv3 license.
 
-from element import Element
+from tag import Tag
 
 
-class CodeBlock(Element):
-    language: str
-
-    def __init__(self, language: str, inner: str):
+class CodeBlock(Tag):
+    language: str = ""
+    def __init__(self, content: str, language: str):
         self.language = language
-        self.inner = inner
+        super().__init__(content)

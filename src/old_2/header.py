@@ -6,11 +6,12 @@
 #
 # Distributed under terms of the GPLv3 license.
 
-from tag import Tag
+from element import Element
 
 
-class Header(Tag):
-    level: int = 0
-    def __init__(self, content: str, level: int):
+class Header(Element):
+    level: int = 1
+
+    def __init__(self, level: int, inner: str):
         self.level = level
-        super().__init__(content)
+        self.inner = inner

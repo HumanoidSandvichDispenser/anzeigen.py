@@ -4,7 +4,7 @@
 #
 # Copyright © 2021 sandvich <sandvich@manjaro>
 #
-# Distributed under terms of the MIT license.
+# Distributed under terms of the GPLv3 license.
 
 import re
 from char_iterator import CharIterator
@@ -13,6 +13,7 @@ from header import Header
 from character import Character
 from emphatic import Emphatic
 from code_block import CodeBlock
+
 
 class Lexer:
     source_content: str = ""
