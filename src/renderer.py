@@ -41,7 +41,9 @@ class Renderer:
             else:
                 self.prerendered_text += "\n"
                 if isinstance(token, Header):
-                    self.prerendered_text += self.term.green_reverse(token.content)
+                    header_prefix = self.term.bold_black("#" * token.level)
+                    header_title = self.term.bold_green(token.content)
+                    self.prerendered_text += header_prefix + " " + header_title
                 elif isinstance(token, CodeBlock):
                     lexer = TextLexer()
                     try:
@@ -50,7 +52,7 @@ class Renderer:
                         pass
                     formatter = TerminalFormatter()
                     self.prerendered_text += highlight(token.content, lexer,
-                                             formatter)
+                                                       formatter)
 
     """
     Handles text overflowing the terminal (either wrap or truncate)
@@ -62,16 +64,15 @@ class Renderer:
     Renders each visible line on the terminal
     """
     def render(self, top: int):
-        with self.term.hidden_cursor():
-            print(self.term.clear)
-            renderable_text = self.rendered_text[top:top
-                                                 + self.term.height - 2]
-            for line in renderable_text:
-                print(line)
-            with self.term.location(0, self.term.height - 1):
-                print(self.status_left, end="")
-                print(self.term.center(self.status_middle), end="")
-                print(self.term.rjust(self.status_right), end="")
+        print(self.term.clear, end="")
+        renderable_text = self.rendered_text[top:top
+                                             + self.term.height - 2]
+        for line in renderable_text:
+            print(line)
+        with self.term.location(0, self.term.height - 1):
+            print(self.status_left, end="")
+            #print(self.term.center(self.status_middle), end="")
+            print(self.term.rjust(self.status_right), end="")
 
     def getch(self):
         return getch.getch()

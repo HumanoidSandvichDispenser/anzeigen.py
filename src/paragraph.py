@@ -9,5 +9,5 @@
 from element import Element
 
 
-class Header(Element):
-    level: int = 1
+class Paragraph(Element):
+    pass

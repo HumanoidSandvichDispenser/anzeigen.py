@@ -6,6 +6,7 @@
 #
 # Distributed under terms of the MIT license.
 
+import blessed
 from renderer import Renderer
 
 
@@ -15,6 +16,7 @@ class Interface:
     keymaps: dict = {
         "j": "down",
         "k": "up",
+        "q": "quit",
         ":": "open_prompt",
         "\x1b": None,
     }
@@ -24,29 +26,36 @@ class Interface:
     prompt_text: str = ""
 
     renderer: Renderer = None
+    term: blessed.Terminal = None
 
     line_number: int = 0
 
     def __init__(self, renderer: Renderer):
         self.commands = {
             "down": self.down,
-            "up": self.up
+            "up": self.up,
+            "quit": self.quit,
+            "open_prompt": self.open_prompt
         }
 
         self.renderer = renderer
+        self.term = renderer.term
         renderer.prerender()
 
     def start_loop(self):
         self.renderer.handle_overflow()
-        while True:
-            self.renderer.render(self.line_number)
-            self.handle_key(self.renderer.getch())
+        with self.term.hidden_cursor(), \
+                self.term.fullscreen():
+            while True:
+                self.renderer.render(self.line_number)
+                self.handle_key(self.renderer.getch())
 
     def handle_key(self, char: str):
         if self.prompt_open:
             if char == "\n":
                 self.parse_command(self.prompt_text)
                 self.prompt_text = self.renderer.status_left = ""
+                self.prompt_open = False
             else:
                 self.prompt_text += char
                 self.renderer.status_left = self.prompt_text
@@ -69,6 +78,9 @@ class Interface:
 
     def open_prompt(self):
         self.prompt_open = True
+
+    def quit(self):
+        exit(0)
 
     def down(self):
         if self.line_number < len(self.renderer.rendered_text) - 1:

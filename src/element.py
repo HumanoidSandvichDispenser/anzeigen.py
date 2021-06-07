@@ -6,8 +6,8 @@
 #
 # Distributed under terms of the MIT license.
 
-from element import Element
+class Element:
+    inner_elements: list = []
 
-
-class Header(Element):
-    level: int = 1
+    def __init__(self, *inner):
+        self.inner_elements.append(inner)
