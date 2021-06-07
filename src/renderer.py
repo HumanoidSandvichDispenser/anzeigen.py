@@ -8,31 +8,40 @@
 
 from pygments import highlight, util
 from pygments.lexers import get_lexer_by_name, TextLexer
-from pygments.formatters import TerminalFormatter, Terminal256Formatter, TerminalTrueColorFormatter
-import inspect
+from pygments.formatters import TerminalFormatter
 import blessed
+import getch
 from tag import Tag
 from character import Character
 from header import Header
-from emphatic import Emphatic
 from code_block import CodeBlock
+
 
 class Renderer:
     tokens: list[Tag] = None
     term: blessed.Terminal = None
+    prerendered_text: str = ""
+    rendered_text: list[str] = []
+
+    status_left: str = ""
+    status_right: str = ""
+    status_middle: str = ""
 
     def __init__(self, tokens):
         self.term = blessed.Terminal()
         self.tokens = tokens
 
-    def render(self, line: int):
+    """
+    Converts Markdown objects into renderable text
+    """
+    def prerender(self):
         for token in self.tokens:
             if isinstance(token, Character):
-                print(token.content, end = "")
+                self.prerendered_text += token.content
             else:
-                print() # Print blank line
+                self.prerendered_text += "\n"
                 if isinstance(token, Header):
-                    print(self.term.green_reverse(token.content), end = "")
+                    self.prerendered_text += self.term.green_reverse(token.content)
                 elif isinstance(token, CodeBlock):
                     lexer = TextLexer()
                     try:
@@ -40,11 +49,29 @@ class Renderer:
                     except util.ClassNotFound:
                         pass
                     formatter = TerminalFormatter()
-                    print(highlight(token.content, lexer, formatter), end = "")
-                """
-                if token.emphatic_type in "*_":
-                    if len(token.emphatic_type) == 1:
-                        print(self.term.italic(token.content), end = "")
-                    elif len(token.emphatic_type) == 2:
-                        print(self.term.bold(token.content), end = "")
-                """
+                    self.prerendered_text += highlight(token.content, lexer,
+                                             formatter)
+
+    """
+    Handles text overflowing the terminal (either wrap or truncate)
+    """
+    def handle_overflow(self):
+        self.rendered_text = self.term.wrap(self.prerendered_text)
+
+    """
+    Renders each visible line on the terminal
+    """
+    def render(self, top: int):
+        with self.term.hidden_cursor():
+            print(self.term.clear)
+            renderable_text = self.rendered_text[top:top
+                                                 + self.term.height - 2]
+            for line in renderable_text:
+                print(line)
+            with self.term.location(0, self.term.height - 1):
+                print(self.status_left, end="")
+                print(self.term.center(self.status_middle), end="")
+                print(self.term.rjust(self.status_right), end="")
+
+    def getch(self):
+        return getch.getch()
