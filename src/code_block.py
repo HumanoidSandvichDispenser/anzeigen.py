@@ -4,9 +4,10 @@
 #
 # Copyright © 2021 sandvich <sandvich@manjaro>
 #
-# Distributed under terms of the MIT license.
+# Distributed under terms of the GPLv3 license.
 
 from tag import Tag
+
 
 class CodeBlock(Tag):
     language: str = ""

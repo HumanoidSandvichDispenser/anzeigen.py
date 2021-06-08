@@ -6,11 +6,12 @@ A terminal markdown renderer using `ueberzug` to display images.
 
 - ☑️  Headers
 - ☑️  Multiline code blocks
-- ⬜️ Scrolling
+- ☑️  Scrolling
+- ⬜️ Inline elements
 - ⬜️ Displaying images
 - ⬜️ Everything else
 
-## Rendering Test
+## Rendering Test 🧋
 **bold text**
 __bold 2
 *italic text*

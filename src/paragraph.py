@@ -4,10 +4,10 @@
 #
 # Copyright © 2021 sandvich <sandvich@manjaro>
 #
-# Distributed under terms of the GPLv3 license.
+# Distributed under terms of the MIT license.
 
 from tag import Tag
 
 
-class Character(Tag):
-    pass
+class Paragraph(Tag):
+    children: str = []
