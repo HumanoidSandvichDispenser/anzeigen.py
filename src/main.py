@@ -6,6 +6,8 @@
 #
 # Distributed under terms of the GPLv3 license.
 
+from bs4 import BeautifulSoup
+from markdown2 import Markdown
 import click
 from lexer import Lexer
 from char_iterator import CharIterator
@@ -19,10 +21,15 @@ from interface import Interface
 # set default parameters in the function to silence missing arguments error
 def main(filename: str = None, cat: bool = False):
     file = open(filename, "r")
-    lex = Lexer(file.read())
-    tokens = list(lex.tokenize_blocks(CharIterator(lex.source_content)))
-    interface = Interface(Renderer(tokens))
+    markdown = Markdown()
+    html = markdown.convert(file.read())
+    soup = BeautifulSoup(html, "html.parser")
+    interface = Interface(Renderer(soup.contents))
     interface.start_loop()
+    #lex = Lexer(file.read())
+    #tokens = list(lex.tokenize_blocks(CharIterator(lex.source_content)))
+    #interface = Interface(Renderer(tokens))
+    #interface.start_loop()
 
 
 if __name__ == "__main__":

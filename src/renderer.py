@@ -9,16 +9,14 @@
 from pygments import highlight, util
 from pygments.lexers import get_lexer_by_name, TextLexer
 from pygments.formatters import TerminalFormatter
+from bs4 import BeautifulSoup, NavigableString
 import blessed
 import getch
-from tag import Tag
-from character import Character
-from header import Header
-from code_block import CodeBlock
+import re
 
 
 class Renderer:
-    tokens: list[Tag] = None
+    tags: list = None
     term: blessed.Terminal = None
     prerendered_text: str = ""
     rendered_text: list[str] = []
@@ -27,15 +25,36 @@ class Renderer:
     status_right: str = ""
     status_middle: str = ""
 
-    def __init__(self, tokens):
+    def __init__(self, tags):
         self.term = blessed.Terminal()
-        self.tokens = tokens
+        self.tags = tags
 
     """
     Converts Markdown objects into renderable text
     """
     def prerender(self):
-        for token in self.tokens:
+        for tag in self.tags:
+            name = tag.name
+            if match := re.match(r"h([1-6])", str(name)):
+                self.prerendered_text += "\n"
+                # 1st match group is the header level
+                header_prefix = self.term.bold_black("#" * int(match.group(1)))
+                header_title = self.term.bold_green(tag.contents[0])
+                self.prerendered_text += header_prefix + " " + header_title + "\n\n"
+            elif name == "p":
+                self.prerender_par_tree(tag.contents)
+
+    def prerender_par_tree(self, children, level: int = 0, **branch_flags):
+        for content in children:
+            print("START")
+            print(content)
+            print("END")
+            if isinstance(content, NavigableString):
+                self.prerendered_text += str(content.string).strip()
+        #if level == 0:
+            #self.prerendered_text += "\n"
+
+            """
             if isinstance(token, Character):
                 self.prerendered_text += token.content
             else:
@@ -53,6 +72,7 @@ class Renderer:
                     formatter = TerminalFormatter()
                     self.prerendered_text += highlight(token.content, lexer,
                                                        formatter)
+            """
 
     """
     Handles text overflowing the terminal (either wrap or truncate)
