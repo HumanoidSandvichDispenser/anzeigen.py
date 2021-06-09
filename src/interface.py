@@ -7,6 +7,7 @@
 # Distributed under terms of the GPLv3 license.
 
 import blessed
+import signal
 from renderer import Renderer
 
 
@@ -43,7 +44,11 @@ class Interface:
         renderer.prerender_tree(renderer.tags)
 
     def start_loop(self):
+        def on_resize(*args):
+            self.renderer.handle_overflow()
+            self.renderer.render(self.line_number)
         self.renderer.handle_overflow()
+        signal.signal(signal.SIGWINCH, on_resize)
         with self.term.hidden_cursor(), \
                 self.term.raw(), \
                 self.term.fullscreen():

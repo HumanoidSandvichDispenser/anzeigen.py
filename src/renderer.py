@@ -100,6 +100,7 @@ class Renderer:
     Handles text overflowing the terminal (either wrap or truncate)
     """
     def handle_overflow(self):
+        self.rendered_text.clear()
         for line in self.prerendered_text.split("\n"):
             prefix = ""
             while line.startswith("!blockquote"):
