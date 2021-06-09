@@ -11,7 +11,6 @@ from pygments.lexers import get_lexer_by_name, TextLexer
 from pygments.formatters import TerminalFormatter
 from bs4 import NavigableString, Tag
 import blessed
-import getch
 import re
 
 
@@ -85,11 +84,8 @@ class Renderer:
         renderable_text = self.rendered_text[top:top
                                              + self.term.height - 2]
         for line in renderable_text:
-            print(line)
+            print(line, end="\r\n")
         with self.term.location(0, self.term.height - 1):
             print(self.status_left, end="")
             #print(self.term.center(self.status_middle), end="")
             print(self.term.rjust(self.status_right), end="")
-
-    def getch(self):
-        return getch.getch()

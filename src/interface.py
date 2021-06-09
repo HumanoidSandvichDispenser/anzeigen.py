@@ -45,10 +45,11 @@ class Interface:
     def start_loop(self):
         self.renderer.handle_overflow()
         with self.term.hidden_cursor(), \
+                self.term.raw(), \
                 self.term.fullscreen():
             while True:
                 self.renderer.render(self.line_number)
-                self.handle_key(self.renderer.getch())
+                self.handle_key(self.term.getch())
 
     def handle_key(self, char: str):
         if self.prompt_open:
