@@ -40,7 +40,7 @@ class Interface:
 
         self.renderer = renderer
         self.term = renderer.term
-        renderer.prerender()
+        renderer.prerender_tree(renderer.tags)
 
     def start_loop(self):
         self.renderer.handle_overflow()
