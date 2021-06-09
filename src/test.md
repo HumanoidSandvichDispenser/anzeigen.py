@@ -32,7 +32,7 @@ void Menu::DisplayText(std::string text = "Example code block") override {
 }
 ```
 
-```c#
+```cs
 public class CSharpCodeBlock {
     public string Example = "Example C#" { get; internal set; };
     public bool Example2 => Example != Function(this);
