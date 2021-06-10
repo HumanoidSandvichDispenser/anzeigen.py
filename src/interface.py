@@ -28,6 +28,7 @@ class Interface:
 
     renderer: Renderer = None
     term: blessed.Terminal = None
+    stdscr = None
 
     line_number: int = 0
 
@@ -57,8 +58,10 @@ class Interface:
                 self.handle_key(self.term.getch())
 
     def handle_key(self, char: str):
-        if self.prompt_open:
-            if char == "\n":
+        if char == "\x03":
+            exit(0)
+        elif self.prompt_open:
+            if char == "\r":
                 self.parse_command(self.prompt_text)
                 self.prompt_text = self.renderer.status_left = ""
                 self.prompt_open = False
@@ -77,23 +80,19 @@ class Interface:
             self.repeat_command += char
             self.renderer.status_right = self.repeat_command
 
-    def parse_command(self, command: str, repeat_count: int = 1):
-        for i in range(repeat_count):
-            if command in self.commands:
-                self.commands[command]()
+    def parse_command(self, command: str, count: int = 1):
+        if command in self.commands:
+            self.commands[command](count)
 
-    def open_prompt(self):
+    def open_prompt(self, count: int):
         self.prompt_open = True
 
-    def quit(self):
+    def quit(self, count: int):
         exit(0)
 
-    def down(self):
-        if self.line_number < len(self.renderer.rendered_text) - 1:
-            self.line_number += 1
-            self.renderer.status_middle = str(self.line_number + 1)
+    def down(self, count: int):
+        self.line_number = min(self.line_number + count,
+                               len(self.renderer.rendered_text) - 1)
 
-    def up(self):
-        if self.line_number > 0:
-            self.line_number -= 1
-            self.renderer.status_middle = str(self.line_number + 1)
+    def up(self, count: int):
+        self.line_number = max(self.line_number - count, 0)

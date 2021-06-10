@@ -12,13 +12,18 @@ from pygments.formatters import TerminalFormatter
 from bs4 import NavigableString, Tag
 import blessed
 import re
+import sys
+import curses
+import utils
 
 
 class Renderer:
     tags: list = None
     term: blessed.Terminal = None
+
     prerendered_text: str = ""
     rendered_text: list[str] = []
+    rendered_text_len: list[int] = []
 
     status_left: str = ""
     status_right: str = ""
@@ -42,15 +47,15 @@ class Renderer:
             if match := re.match(r"h([1-6])", str(name)):
                 header_prefix = self.term.bold_black("#" * int(match.group(1)))
                 header_title = self.term.bold_green(tag.contents[0])
-                self.prerendered_text += ("\n" + header_prefix + " "
-                                          + header_title + "\n\n")
+                self.prerendered_text += (header_prefix + " "
+                                          + header_title)
             elif name == "p":
                 self.prerender_par_tree(tag.contents, 0, self.term.normal)
             elif name == "blockquote":
                 self.prerender_tree(tag.contents, "!blockquote")
             if name is not None:
                 # add line break since it is at block level
-                self.prerendered_text += "\n"
+                self.prerendered_text += "\n\n"
 
     def prerender_par_tree(self, children, level: int = 0, *attr: tuple):
         for content in children:
@@ -71,7 +76,7 @@ class Renderer:
                     # inline codeblocks do not have line breaks
                     if str(content).find("\n") == -1:
                         self.prerender_par_tree(content.contents, level + 1,
-                                                *attr, self.term.on_gray10)
+                                                *attr, self.term.on_black)
                     else:
                         self.prerender_code(content.contents)
 
@@ -90,10 +95,11 @@ class Renderer:
                         code_str = "\n".join(code_split_by_line[1:])
                     lexer = get_lexer_for_filename("file." + extension)
                 except util.ClassNotFound:
-                    pass
+                    extension = "Code Block"
                 formatter = TerminalFormatter()
-                self.prerendered_text += "[{0}]\n{1}".format(
-                        self.term.gray40(extension),
+                self.prerendered_text += "{0} {1}\n{2}\n{0}".format(
+                        self.term.gray40("```"),
+                        self.term.gray40("[" + extension + "]"),
                         highlight(code_str, lexer, formatter))
 
     """
@@ -102,6 +108,8 @@ class Renderer:
     def handle_overflow(self):
         self.rendered_text.clear()
         for line in self.prerendered_text.split("\n"):
+            if line == "":
+                line = " "  # blank lines do not pass the text wrapper
             prefix = ""
             while line.startswith("!blockquote"):
                 prefix += self.term.blue("▌ ")
@@ -110,15 +118,35 @@ class Renderer:
                                       initial_indent=prefix,
                                       subsequent_indent=prefix))
 
+        self.rendered_text_len.clear()
+        for line in self.rendered_text:
+            self.rendered_text_len.append(utils.get_visible_length(line))
+
     """
     Renders each visible line on the terminal
     """
     def render(self, top: int):
-        print(self.term.clear, end="")
-        renderable_text = self.rendered_text[top:top
-                                             + self.term.height - 2]
-        for line in renderable_text:
-            print(line, end="\r\n")
+        renderable_lines = self.rendered_text[top:top +
+                                              self.term.height - 2]
+        renderable_text = ""
+
+        # this method of rendering (by rewriting over each
+        # char instead of clearing) reduces flickering on older terminals
+        for i, line in enumerate(renderable_lines):
+            remaining_len = self.term.width - self.rendered_text_len[top + i]
+            renderable_text += line + (" " * remaining_len) + "\r\n"
+
+        with self.term.location(0, 0):
+            print(renderable_text, end="", flush=True)
+
+        # clear lines that are supposed to be blank
+        renderable_lines_len = len(renderable_lines)
+        with self.term.location(0, renderable_lines_len):
+            for i in range(self.term.height - renderable_lines_len):
+                print(" " * self.term.width, end="")
+
         with self.term.location(0, self.term.height - 1):
-            print(self.status_left, end="")
-            print(self.term.rjust(self.status_right), end="")
+            print(self.term.ljust(self.status_left, width=self.term.width//2),
+                  end="")
+            print(self.term.rjust(self.status_right, width=self.term.width//2),
+                  end="")

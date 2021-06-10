@@ -46,6 +46,8 @@ No language code block
 
 > This is a sample blockquote. It should have word wrapping and still rendered prepended with a bar. The blockquote below should be nested with two bars:
 > > Hello, world!
+> а мы с улыбкой пойдём умирать
+> > Again
 
 ## Dependencies
 - `ueberzug` for displaying images
